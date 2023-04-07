@@ -32,7 +32,6 @@ const Home: NextPage = () => {
           <h1>No Data Available</h1>
         }
 
-
         <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
       </main>
     </>
