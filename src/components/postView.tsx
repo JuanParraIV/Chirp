@@ -1,6 +1,5 @@
 import React from 'react'
 import dayjs from 'dayjs'
-import { api } from "@/utils/api";
 import type { RouterOutputs } from "@/utils/api";
 
 import relativeTime from 'dayjs/plugin/relativeTime'
@@ -24,7 +23,7 @@ const PostView = (props: PostWithUser) => {
       />
       <div className="flex flex-col">
         <div className="flex text-slate-300 gap-1">
-          <span>{`@${author.username}`}</span>
+            <span><span>@</span>{author?.username}</span>
           <span className="font-thin">{` · ${dayjs(post.createdAt).fromNow()}`}</span>
         </div>
         <span className='text-xl'>{post.content}</span>
