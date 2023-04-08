@@ -14,8 +14,8 @@ const CreatePostWizard = () => {
         className='rounded-full'
         alt="userImg"
         src={user.profileImageUrl}
-        width={36}
-        height={36}
+        width={56}
+        height={56}
       />
       <input className='bg-transparent grow outline-none' placeholder="Type some emojis!" />
     </div>
