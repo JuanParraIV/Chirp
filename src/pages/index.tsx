@@ -1,74 +1,16 @@
 import { type NextPage } from "next";
 import Head from "next/head";
-import Link from "next/link";
 
-import Image from "next/image"
-import dayjs from 'dayjs'
-import relativeTime from 'dayjs/plugin/relativeTime'
+import { SignIn, SignInButton, useUser } from "@clerk/nextjs";
 
-import { SignIn, SignInButton, SignOutButton, useUser } from "@clerk/nextjs";
-import { api } from "@/utils/api";
-import { LoadingPage } from "@/components/loading";
+import CreatePostWizard from "@/components/createPostWizard";
+import Feed from "@/components/feed";
 
-import type { RouterOutputs } from "@/utils/api";
 
-dayjs.extend(relativeTime)
-
-const CreatePostWizard = () => {
-
-  const { isLoaded, isSignedIn, user } = useUser();
-
-  if (!user) return null;
-
-  return (
-    <div className="flex gap-3 w-full ">
-      <Image
-        className='rounded-full'
-        alt="userImg"
-        src={user.profileImageUrl}
-        width={36}
-        height={36}
-      />
-      <input className='bg-transparent grow outline-none' placeholder="Type some emojis!" />
-    </div>
-  )
-}
-
-type PostWithUser = RouterOutputs['post']['getAll'][number]
-const PostView = (props: PostWithUser) => {
-  const { post, author } = props;
-  return (
-    <div className="flex p-4 border-b border-slate-400 gap-3">
-      <Image
-        className='rounded-full'
-        alt="userImg"
-        src={author.profileImageUrl}
-        width={36}
-        height={36}
-      />
-      <div className="flex flex-col">
-        <div className="flex text-slate-300 gap-1">
-          <span>{`@${author.username}`}</span>
-          <span className="font-thin">{` · ${dayjs(post.createdAt).fromNow()}`}</span>
-        </div>
-        <span>{post.content}</span>
-      </div>
-
-    </div>
-  )
-}
 const Home: NextPage = () => {
 
+  const { isSignedIn } = useUser();
 
-  const { user } = useUser();
-  const { data, isLoading, error } = api.post.getAll.useQuery();
-
-  if (error) return <h1>Something goes wrong</h1>
-
-  if (isLoading) return <LoadingPage />
-
-  console.log(user)
-  console.log(data)
   return (
     <>
       <Head>
@@ -79,26 +21,20 @@ const Home: NextPage = () => {
       <main className="flex justify-center h-screen">
         <div className=" w-full md: max-w-2xl border-x border-slate-400 h-full">
           <div className="border-b border-slate-400 p-4 flex">
-            {!user ?
+            {!isSignedIn ?
               <div className="flex justify-center">
                 <SignInButton />
               </div>
               :
               null
             }
-            {user ?
+            {isSignedIn ?
               <CreatePostWizard />
               :
               null
             }
           </div>
-          <div>
-            {data &&
-              data?.map((fullPost) => (
-                <PostView {...fullPost} key={`${fullPost.post.content}_${fullPost.post.id}`} />
-              ))}
-          </div>
-
+          <Feed />
           <SignIn path="/sign-in" routing="path" signUpUrl="/sign-up" />
         </div>
       </main>
