@@ -6,7 +6,7 @@ const config = {
   ],
   // your other options here
   printWidth: 120,
-  semi: false,
+  semi: true,
   singleQuote: true,
   trailingComma: 'all',
   bracketSpacing: true,
