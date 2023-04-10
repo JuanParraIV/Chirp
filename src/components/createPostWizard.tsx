@@ -2,21 +2,27 @@ import { api } from '@/utils/api';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import React, { useState } from 'react'
-import { z } from 'zod';
+import { toast } from 'react-hot-toast';
+import { LoadingSpinner } from './loading';
 
 const CreatePostWizard = () => {
-  const contentSchema = z.string().emoji().min(1).max(280);
 
   const [input, setInput] = useState<string>("")
-  const [error, setError] = useState<string>("");
-  console.log(error)
   const { user } = useUser();
 
   const ctx = api.useContext()
   const { mutate, isLoading: isPosting } = api.post.create.useMutation({
     onSuccess: () => {
       setInput(''),
-      void ctx.post.getAll.invalidate()
+        void ctx.post.getAll.invalidate()
+    },
+    onError: (e) => {
+      const errorMessage = e.data?.zodError?.fieldErrors.content;
+      if (errorMessage && errorMessage[0]) {
+        toast.error(errorMessage[0])
+      } else {
+        toast.error('Failed to post! Please try again later.')
+      }
     }
   })
 
@@ -24,12 +30,12 @@ const CreatePostWizard = () => {
 
   const handlePost = () => {
     try {
-      contentSchema.parse(input); // validate the input with zod
-      mutate({ content: input });
+      if (input !== "") {
+        mutate({content: input})
+      }
       setInput("");
     } catch (err: unknown) {
-  if (err instanceof Error) setError(err.message);
-}
+    }
   };
 
   return (
@@ -47,16 +53,29 @@ const CreatePostWizard = () => {
         type='text'
         value={input}
         onChange={(e) => setInput(e.target.value)}
+        onKeyDown={(e)=>{
+          if (e.key === 'Enter') {
+            e.preventDefault()
+            if (input !== "") {
+              mutate({content: input})
+            }
+          }
+        }}
         disabled={isPosting}
       />
-      <button
-        className='p-5 bg-purple-600 rounded-full'
-        onClick={handlePost}
-        disabled={isPosting}
-      >
-        Post
-      </button>
-      {error && <p className="text-red-500">{error}</p>}
+      {input !== "" && !isPosting && (
+        <button
+          className='p-5 bg-purple-600 rounded-full'
+          onClick={handlePost}
+        >
+          Post
+        </button>
+      )}
+      {isPosting && (
+        <div className='flex justify-center items-center'>
+          <LoadingSpinner size={20} />
+        </div>
+      )}
     </div>
   )
 }
