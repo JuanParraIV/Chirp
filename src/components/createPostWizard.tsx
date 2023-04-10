@@ -2,21 +2,35 @@ import { api } from '@/utils/api';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
 import React, { useState } from 'react'
+import { z } from 'zod';
 
 const CreatePostWizard = () => {
+  const contentSchema = z.string().emoji().min(1).max(280);
 
-  const [input, setInput] = useState("")
+  const [input, setInput] = useState<string>("")
+  const [error, setError] = useState<string>("");
+  console.log(error)
   const { user } = useUser();
 
-  const ctx= api.useContext()
+  const ctx = api.useContext()
   const { mutate, isLoading: isPosting } = api.post.create.useMutation({
-    onSuccess: async ()=>{
+    onSuccess: () => {
       setInput(''),
-      await ctx.post.getAll.invalidate()
+      void ctx.post.getAll.invalidate()
     }
   })
 
   if (!user) return null;
+
+  const handlePost = () => {
+    try {
+      contentSchema.parse(input); // validate the input with zod
+      mutate({ content: input });
+      setInput("");
+    } catch (err: unknown) {
+  if (err instanceof Error) setError(err.message);
+}
+  };
 
   return (
     <div className="flex gap-3 w-full ">
@@ -36,9 +50,13 @@ const CreatePostWizard = () => {
         disabled={isPosting}
       />
       <button
-      className='p-5 bg-purple-600 rounded-full'
-      onClick={()=>mutate({content: input})}
-      > Post</button>
+        className='p-5 bg-purple-600 rounded-full'
+        onClick={handlePost}
+        disabled={isPosting}
+      >
+        Post
+      </button>
+      {error && <p className="text-red-500">{error}</p>}
     </div>
   )
 }
