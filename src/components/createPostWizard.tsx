@@ -1,7 +1,7 @@
 import { api } from '@/utils/api';
 import { useUser } from '@clerk/nextjs';
 import Image from 'next/image';
-import React, { useContext, useState } from 'react'
+import React, { useState } from 'react'
 
 const CreatePostWizard = () => {
 
@@ -10,9 +10,9 @@ const CreatePostWizard = () => {
 
   const ctx= api.useContext()
   const { mutate, isLoading: isPosting } = api.post.create.useMutation({
-    onSuccess: ()=>{
+    onSuccess: async ()=>{
       setInput(''),
-      ctx.post.getAll.invalidate()
+      await ctx.post.getAll.invalidate()
     }
   })
 
