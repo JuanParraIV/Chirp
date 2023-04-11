@@ -65,7 +65,7 @@ const CreatePostWizard = () => {
       />
       {input !== "" && !isPosting && (
         <button
-          className='p-5 bg-purple-600 rounded-full'
+          className='btn btn-primary'
           onClick={handlePost}
         >
           Post
